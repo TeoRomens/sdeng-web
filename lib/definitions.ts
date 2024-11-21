@@ -22,10 +22,10 @@ export const SignupFormSchema = z.object({
 })
 
 export type FormState = {
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  password?: string;
   errors?: {
     firstName?: string[];
     lastName?: string[];
@@ -33,4 +33,5 @@ export type FormState = {
     password?: string[];
   };
   message?: string;
+  status?: string;
 };

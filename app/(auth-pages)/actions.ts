@@ -39,9 +39,11 @@ export async function signUpAction(state: FormState, formData: FormData): Promis
     throw new Error("No origin found in request headers");
   }
 
+  const bcrypt = require('bcrypt');
+  const hashedPassword = bcrypt.hash(password, 10);
   const { error } = await supabase.auth.signUp({
     email: validatedFields.data.email,
-    password: validatedFields.data.password,
+    password: hashedPassword.toString(),
     options: {
       emailRedirectTo: `${origin}/auth/callback`,
     },
@@ -55,14 +57,12 @@ export async function signUpAction(state: FormState, formData: FormData): Promis
       email: email,
       password: password,
       message: error.message,
+      status: "error"
     }
   }
   console.log("Sign up successfully");
   return {
-    firstName: firstName,
-    lastName: lastName,
-    email: email,
-    password: password,
+    status: "success"
   }
 }
 
