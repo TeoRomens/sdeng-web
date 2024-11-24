@@ -3,6 +3,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import type { Viewport } from "next";
 import { JetBrains_Mono as FontMono, Inter as FontSans } from "next/font/google";
 import "./globals.css";
+import React from "react";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -22,8 +23,8 @@ export const viewport: Viewport = {
 };
 
 export default function RootLayout({
-                                     children,
-                                   }: Readonly<{
+     children,
+   }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
@@ -38,7 +39,6 @@ export default function RootLayout({
           disableTransitionOnChange
       >
         <div className="relative flex min-h-screen flex-col overflow-hidden supports-[overflow:clip]:overflow-clip">
-          <Header />
           {children}
         </div>
       </ThemeProvider>

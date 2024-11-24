@@ -2,6 +2,7 @@ import Illustration from "@/components/illustration";
 import Newsletter from "@/components/subscribe-form";
 import XLinks from "@/components/x-links";
 import type { Metadata } from "next";
+import Header from "@/components/header";
 
 export const metadata: Metadata = {
   title: "Sdeng Manager",
@@ -13,6 +14,7 @@ export default function Page() {
   return (
       <>
         <Illustration />
+        <Header />
         <main>
           <div className="px-4 sm:px-6">
             <div className="mx-auto w-full max-w-3xl">

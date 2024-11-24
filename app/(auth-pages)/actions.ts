@@ -4,13 +4,14 @@ import { encodedRedirect } from "@/utils/utils";
 import { createClient } from "@/utils/supabase/server";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import {FormState, SignupFormSchema} from "@/lib/definitions";
+import {SignupFormState, SignupFormSchema, SigninFormSchema, SigninFormState} from "@/lib/definitions";
 
-export async function signUpAction(state: FormState, formData: FormData): Promise<FormState> {
+export async function signUpAction(state: SignupFormState, formData: FormData): Promise<SignupFormState> {
   const firstName = formData.get('firstName') as string;
   const lastName = formData.get('lastName') as string;
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
+
   // Validate form fields
   const validatedFields = SignupFormSchema.safeParse({
     firstName: firstName,
@@ -18,11 +19,8 @@ export async function signUpAction(state: FormState, formData: FormData): Promis
     email: email,
     password: password,
   });
-
   // If any form fields are invalid, return early
   if (!validatedFields.success) {
-    console.log({...state, errors: validatedFields.error.flatten().fieldErrors,
-    })
     return {
       ...state,
       firstName: firstName,
@@ -66,21 +64,49 @@ export async function signUpAction(state: FormState, formData: FormData): Promis
   }
 }
 
-export const signInAction = async (formData: FormData) => {
+export async function signInAction(state: SigninFormState, formData: FormData): Promise<SigninFormState> {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
-  const supabase = await createClient();
 
+  // Validate form fields
+  const validatedFields = SigninFormSchema.safeParse({
+    email: email,
+    password: password,
+  });
+  // If any form fields are invalid, return early
+  if (!validatedFields.success) {
+    return {
+      ...state,
+      email: email,
+      password: password,
+      errors: validatedFields.error.flatten().fieldErrors,
+    }
+  }
+
+  const supabase = await createClient();
+  const origin = (await headers()).get("origin");
+  if (!origin) {
+    throw new Error("No origin found in request headers");
+  }
+
+  const bcrypt = require('bcrypt');
+  const hashedPassword = bcrypt.hash(password, 10);
   const { error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
+    email: validatedFields.data.email,
+    password: hashedPassword.toString(),
   });
 
   if (error) {
-    return encodedRedirect("error", "/sign-in", error.message);
+    console.error(error.code + " " + error.message);
+    return {
+      email: email,
+      password: password,
+      message: error.message,
+      status: "error"
+    }
   }
 
-  return redirect("/protected");
+  return redirect("/m");
 };
 
 export const forgotPasswordAction = async (formData: FormData) => {
@@ -157,5 +183,5 @@ export const resetPasswordAction = async (formData: FormData) => {
 export const signOutAction = async () => {
   const supabase = await createClient();
   await supabase.auth.signOut();
-  return redirect("/sign-in");
+  return redirect("/login");
 };

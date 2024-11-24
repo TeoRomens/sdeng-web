@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import React from "react";
-import { useActionState } from "react"
-import { Button } from "@/components/ui/button";
+import { useActionState, useState } from "react"
+import {cn} from "@/utils/cn";
 import {
   Card,
   CardContent,
@@ -11,7 +11,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import Input06 from "@/components/input-06";
 import {signUpAction} from "@/app/(auth-pages)/actions";
 import {
   AlertDialog, AlertDialogAction, AlertDialogContent,
@@ -20,9 +19,16 @@ import {
   AlertDialogHeader,
   AlertDialogTitle
 } from "@/components/ui/alert-dialog";
+import {Label} from "@/components/ui/label";
+import {Input} from "@/components/ui/input";
+import {Eye, EyeOff, LoaderCircle} from "lucide-react";
+import {Button} from "@/components/ui/button";
 
 export default function SignUpForm() {
   const [state, action, pending] = useActionState(signUpAction, {});
+
+  const [isVisible, setIsVisible] = useState<boolean>(false);
+  const toggleVisibility = () => setIsVisible((prevState) => !prevState);
 
   return (
       <>
@@ -59,54 +65,120 @@ export default function SignUpForm() {
         <CardContent>
           <form action={action} className="grid gap-4">
             <div className="grid grid-cols-2 gap-4">
-              <Input06
-                  id="firstName"
-                  name="firstName"
-                  label="First Name"
-                  placeholder="Mario"
-                  defaultValue={state.firstName}
-                  showError={!!state?.errors?.firstName}
-                  errorMessage={state?.errors?.firstName?.[0]}
-                  disabled={pending}
-                  required
-              />
-              <Input06
-                  id="lastName"
-                  name="lastName"
-                  label="Last Name"
-                  placeholder="Rossi"
-                  defaultValue={state.lastName}
-                  showError={!!state?.errors?.lastName}
-                  errorMessage={state?.errors?.lastName?.[0]}
-                  disabled={pending}
-                  required
-              />
+              <div className="space-y-2">
+                <Label htmlFor="firstName">
+                  First Name <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                    className={cn(!!state.errors?.firstName &&
+                        "border-destructive/80 text-destructive focus-visible:border-destructive/80 focus-visible:ring-destructive/30",
+                    )}
+                    id="firstName"
+                    name="firstName"
+                    placeholder="Name"
+                    defaultValue={state.firstName}
+                    disabled={pending}
+                    required/>
+                {state?.errors?.firstName &&
+                    <p className="mt-2 text-xs text-destructive"
+                       role="alert"
+                       aria-live="polite">{state.errors.firstName}</p>}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="lastName">
+                  Last Name <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                    className={cn(!!state.errors?.lastName &&
+                        "border-destructive/80 text-destructive focus-visible:border-destructive/80 focus-visible:ring-destructive/30",
+                    )}
+                    id="lastName"
+                    name="lastName"
+                    placeholder="Surname"
+                    defaultValue={state.firstName}
+                    disabled={pending}
+                    required/>
+                {state?.errors?.lastName &&
+                    <p className="mt-2 text-xs text-destructive"
+                       role="alert"
+                       aria-live="polite">{state.errors.lastName}</p>}
+              </div>
             </div>
-            <Input06
-                id="email"
-                name="email"
-                label="Email"
-                type="email"
-                placeholder="m@example.com"
-                defaultValue={state.email}
-                showError={!!state?.errors?.email}
-                errorMessage={state?.errors?.email?.[0]}
-                disabled={pending}
-                required
-            />
-            <Input06
-                id="password"
-                name="password"
-                label="Password"
-                type="password"
-                placeholder="••••••••"
-                defaultValue={state.password}
-                showError={!!state?.errors?.password}
-                errorMessage={state?.errors?.password?.[0]}
-                disabled={pending}
-                required
-            />
+            <div className="space-y-2">
+              <Label htmlFor="email">
+                Email <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                  className={cn(!!state.errors?.email &&
+                      "border-destructive/80 text-destructive focus-visible:border-destructive/80 focus-visible:ring-destructive/30",
+                  )}
+                  id="email"
+                  name="email"
+                  placeholder="Your email address"
+                  type="email"
+                  defaultValue={state.email}
+                  disabled={pending}
+                  required/>
+              {state?.errors?.email &&
+                  <p className="mt-2 text-xs text-destructive"
+                     role="alert"
+                     aria-live="polite">{state.errors.email}</p>}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">
+                Password <span className="text-destructive">*</span>
+              </Label>
+              <div className="relative">
+                <Input
+                    className={cn("pe-8", !!state.errors?.password &&
+                        "border-destructive/80 text-destructive focus-visible:border-destructive/80 focus-visible:ring-destructive/30",
+                    )}
+                    id="password"
+                    name="password"
+                    type={isVisible ? "text" : "password"}
+                    placeholder="Your password"
+                    defaultValue={state.password}
+                    disabled={pending}
+                    required/>
+                <button
+                    className="absolute inset-y-0 end-0 flex h-full w-9 items-center justify-center rounded-e-lg text-muted-foreground/80 outline-offset-2 transition-colors hover:text-foreground focus:z-10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring/70 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
+                    type="button"
+                    onClick={toggleVisibility}
+                    aria-label={isVisible ? "Hide password" : "Show password"}
+                    aria-pressed={isVisible}
+                    aria-controls="password"
+                >
+                  {isVisible ? (
+                      <EyeOff size={16} strokeWidth={2} aria-hidden="true"/>
+                  ) : (
+                      <Eye size={16} strokeWidth={2} aria-hidden="true"/>
+                  )}
+                </button>
+              </div>
+              {state?.errors?.password && (
+                <div>
+                  <p className="mt-2 text-xs text-destructive"
+                     role="alert"
+                     aria-live="polite">Password must:</p>
+                  <ul className="text-xs text-destructive"
+                      role="alert"
+                      aria-live="polite">
+                    {state.errors.password.map((error) => (
+                        <li key={error}>- {error}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
             <Button type="submit" className="w-full" disabled={pending}>
+              {pending && (
+                  <LoaderCircle
+                      className="-ms-1 me-2 animate-spin"
+                      size={16}
+                      strokeWidth={2}
+                      aria-hidden="true"
+                  />
+              )}
               Create an account
             </Button>
             <Button variant="outline" className="w-full" disabled={pending}>
@@ -120,7 +192,7 @@ export default function SignUpForm() {
             </Link>
           </div>
         </CardContent>
-      </Card>
+        </Card>
       </>
   );
 }

@@ -21,7 +21,7 @@ export const SignupFormSchema = z.object({
       .trim(),
 })
 
-export type FormState = {
+export type SignupFormState = {
   firstName?: string;
   lastName?: string;
   email?: string;
@@ -35,3 +35,20 @@ export type FormState = {
   message?: string;
   status?: string;
 };
+
+export const SigninFormSchema = z.object({
+  email: z.string().email({ message: 'Enter a valid email.' }).trim(),
+  password: z.string().trim(),
+})
+
+export type SigninFormState = {
+  email?: string;
+  password?: string;
+  errors?: {
+    email?: string[];
+    password?: string[];
+  };
+  message?: string;
+  status?: string;
+};
+
